@@ -19,14 +19,13 @@ const generateRandomString = (length) => {
   };
   let randomString = '';
   for (let i = 0; i < length; i++) randomString += generateRandomChar();
-  for (const shortURL in Object.keys(urlDatabase)) if (shortURL === randomString) generateRandomString(length);
+  for (const shortURL in Object.keys(urlDatabase)) if (shortURL === randomString) return generateRandomString(length);
   return randomString;
 };
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(6);
-  console.log(shortURL);
-  urlDatabase[shortURL] = req.params.LongURL;
+  urlDatabase[shortURL] = req.params[LongURL];
   console.log(urlDatabase[shortURL]);
   res.redirect(`/urls/${shortURL}`);
 });
@@ -61,4 +60,12 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
+});
+app.post("/urls/:shortURL/delete", (req, res) => {
+  if (req.params.shortURL && urlDatabase[req.params.shortURL]) delete urlDatabase[req.params.shortURL];
+  res.redirect(`/urls/`);
+});
+app.get("/urls/:shortURL/delete", (req, res) => {
+  if (req.params.shortURL && urlDatabase[req.params.shortURL]) delete urlDatabase[req.params.shortURL];
+  res.redirect(`/urls/`);
 });
