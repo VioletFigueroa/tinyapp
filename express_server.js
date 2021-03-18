@@ -23,10 +23,9 @@ const generateRandomString = (length) => {
   return randomString;
 };
 
-app.post("/urls", (req, res) => {
+app.post("/urls/new", (req, res) => {
   const shortURL = generateRandomString(6);
-  urlDatabase[shortURL] = req.params[LongURL];
-  console.log(urlDatabase[shortURL]);
+  if (req.body['longURL']) urlDatabase[shortURL] = req.body['longURL'];
   res.redirect(`/urls/${shortURL}`);
 });
 
