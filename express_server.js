@@ -9,6 +9,8 @@ app.set("view engine", "ejs");
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
+const users = { };
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -66,6 +68,13 @@ app.get("/register", (req, res) => {
   let templateVars = {username: null};
   if (req.cookies.username) templateVars.username = req.cookies.username;
   res.render("register", templateVars);
+});
+app.post("/register", (req, res) => {
+  const id = generateRandomString(42);
+  users[id] = req.body;
+  console.log(users)
+  res.cookie("user_id", id);
+  res.redirect(`/urls/`);
 });
 app.get("/urls/new", (req, res) => {
   let templateVars = {username: null};
