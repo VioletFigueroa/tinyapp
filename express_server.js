@@ -62,7 +62,11 @@ app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect(`/urls/`);
 });
-
+app.get("/register", (req, res) => {
+  let templateVars = {username: null};
+  if (req.cookies.username) templateVars.username = req.cookies.username;
+  res.render("register", templateVars);
+});
 app.get("/urls/new", (req, res) => {
   let templateVars = {username: null};
   if (req.cookies.username) templateVars.username = req.cookies.username;
