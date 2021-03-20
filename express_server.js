@@ -8,6 +8,7 @@ app.set("view engine", "ejs");
 
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
+const lodash = require("lodash");
 
 const users = {
   "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff": {
@@ -23,18 +24,21 @@ const users = {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "3oqdszqj6vi2u7mnmqa9qr5z3tf08sz1oboq4kgv6g" }
 };
 
 const propertySearch = (object, key, value) => {
   //takes in object of objects, a key, and an expected value.
-  for (const obj of Object.keys(object)) {
-    if (object[obj][key] === value) return object[obj]; //Returns object in object if value is found in that object
+  let output = {};
+  for (const id of Object.keys(object)) {
+    if (object[id][key] === value) output[id] = object[id]; //Returns object in object if value is found in that object
   }
-  return false;
-  //returns false if not found on any of the objects in object;
+  return output;
+  //returns empty object if no matches;
 };
+
+const urlsForUser = id => propertySearch(users, "id", id);
 
 const generateRandomString = length => {
   const generateRandomChar = () => {
@@ -43,7 +47,7 @@ const generateRandomString = length => {
   };
   let randomString = '';
   for (let i = 0; i < length; i++) randomString += generateRandomChar();
-  for (const shortURL in Object.keys(urlDatabase)) if (shortURL === randomString) return generateRandomString(length);
+  if (!lodash.isEmpty(propertySearch(urlDatabase, "shortURL", randomString))) return generateRandomString(length);
   return randomString;
 };
 
@@ -56,24 +60,24 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  if (!req.cookies) {
+  if (!req.cookies["user_id"]) {
     return res.redirect("/login");
   }
-  const templateVars = { user: users[req.cookies.user_id], urls:  urlDatabase };
-  res.render("urls_index", templateVars);
+  const templateVars = { user: users[req.cookies["user_id"]], urls:  urlDatabase };
+  return res.render("urls_index", templateVars);
 });
 
 app.post("/urls/new", (req, res) => {
   const shortURL = generateRandomString(6);
-  if (req.body['longURL']) urlDatabase[shortURL] = req.body['longURL'];
+  if (req.body["longURL"]) urlDatabase[shortURL]["longURL"] = req.body["longURL"];
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!req.cookies.user_id) {
+  if (!req.cookies["user_id"]) {
     return res.redirect("/login");
   }
-  const templateVars = { user: users[req.cookies.user_id] };
+  const templateVars = { user: users[req.cookies["user_id"]] };
   return res.render("urls_new", templateVars);
 });
 
@@ -86,9 +90,9 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  let templateVars = {user: null};
-  if (req.cookies.user_id) res.redirect(`/urls/`);
-  res.render("login", templateVars);
+  const templateVars = {user: null};
+  if (req.cookies["user_id"]) return res.redirect("/urls");
+  return res.render("login", templateVars);
 });
 
 app.post("/login", (req, res) => {
@@ -96,62 +100,61 @@ app.post("/login", (req, res) => {
   const userEmail = propertySearch(users, "email", formEmail);
   const formPassword = req.body["password"];
   const userPassword = propertySearch(users, "password", formPassword);
-  if (!userEmail || !userPassword || userEmail["password"] !== formPassword) {
+  if (!lodash.isEmpty(userEmail) || !lodash.isEmpty(userPassword) || userEmail["password"] !== formPassword) {
     return res.status(403).send('Username or Password incorrect.');
   }
   const user = userEmail["id"];
   res.cookie("user_id", user);
-  res.redirect(`/urls/`);
+  return res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect(`/urls/`);
+  res.redirect("/login");
 });
 
 app.get("/register", (req, res) => {
   let templateVars = {user: null};
-  if (req.cookies.user_id) return res.redirect(`/urls/`);
+  if (req.cookies["user_id"]) return res.redirect("/urls");
   res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {
   if (req.body.email === "") return res.status(400).send('Email form is empty.');
   if (req.body.password === "") return res.status(400).send('Password form is empty.');
-  if (propertySearch(users, "email", req.body.email)) return res.status(400).send('Email already exists.');
+  if (!lodash.isEmpty(propertySearch(users, "email", req.body.email))) return res.status(400).send('Email already exists.');
   const id = generateRandomString(42);
   users[id] = req.body;
   users[id]["id"] = id;
-  //console.log(users);
   res.cookie("user_id", id);
-  res.redirect(`/urls/`);
+  return res.redirect("/urls");
 });
 
 app.post("/urls/:id", (req, res) => {
-  const templateVars = { shortURL: req.params.id, longURL: req.body['longURL']};
-  urlDatabase[templateVars.shortURL] = templateVars.longURL;
-  res.redirect(`/urls/`);
+  if (!req.cookies["user_id"]) return res.redirect("/urls");
+  urlDatabase[req.params.id]["longURL"] = req.body["longURL"];
+  return res.redirect(`/urls/${req.params.id}`);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  if (!req.cookies) {
+  if (!req.cookies["user_id"]) {
     return res.redirect("/login");
   }
-  const templateVars = { user: users[req.cookies.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  const templateVars = { user: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]["longURL"]};
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id]["longURL"];
   res.redirect(longURL);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (req.params.shortURL && urlDatabase[req.params.shortURL]) delete urlDatabase[req.params.shortURL];
-  res.redirect(`/urls/`);
+  res.redirect("/urls");
 });
 
 app.get("/urls/:shortURL/delete", (req, res) => {
   if (req.params.shortURL && urlDatabase[req.params.shortURL]) delete urlDatabase[req.params.shortURL];
-  res.redirect(`/urls/`);
+  res.redirect("/urls");
 });
