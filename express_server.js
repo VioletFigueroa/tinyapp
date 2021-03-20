@@ -27,6 +27,15 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const propertySearch = (object, key, value) => {
+  //takes in object of objects, a key, and an expected value.
+  for (const obj of Object.keys(object)) {
+    if (object[obj][key] === value) return object[obj]; //Returns object in object if value is found in that object
+  }
+  return false;
+  //returns false if not found on any of the objects in object;
+};
+
 const generateRandomString = length => {
   const generateRandomChar = () => {
     const chars = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9'];
@@ -73,11 +82,9 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log(Object.keys(users));
-  for (const user of Object.keys(users)) {
-    if (users[user]["email"] === req.body["email"] && users[user]["password"] === req.body["password"]) {
-      res.cookie("user_id", user);
-    }
+  if (propertySearch(users, "email", req.body["email"])  && propertySearch(users, "password", req.body["password"])) {
+    const user = propertySearch(users, "email", req.body["email"])["id"];
+    res.cookie("user_id", user);
   }
   res.redirect(`/urls/`);
 });
@@ -96,13 +103,11 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   if (req.body.email === "") return res.status(400).send('Email form is empty');
   if (req.body.password === "") return res.status(400).send('Password form is empty');
-  for (const user of Object.keys(users)) {
-    if (req.body.email === users[user]["email"]) return res.status(400).send('Email already exists');
-  }
+  if (propertySearch(users, "email", req.body.email)) return res.status(400).send('Email already exists');
   const id = generateRandomString(42);
   users[id] = req.body;
   users[id]["id"] = id;
-  console.log(users);
+  //console.log(users);
   res.cookie("user_id", id);
   res.redirect(`/urls/`);
 });
