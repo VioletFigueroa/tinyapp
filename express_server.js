@@ -88,10 +88,15 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  if (propertySearch(users, "email", req.body["email"])  && propertySearch(users, "password", req.body["password"])) {
-    const user = propertySearch(users, "email", req.body["email"])["id"];
-    res.cookie("user_id", user);
+  const formEmail = req.body["email"];
+  const userEmail = propertySearch(users, "email", formEmail);
+  const formPassword = req.body["password"]
+  const userPassword = propertySearch(users, "password", formPassword);
+  if (!userEmail || !userPassword || userEmail["password"] !== formPassword) {
+    return res.status(403).send('Username or Password incorrect.');
   }
+  const user = userEmail["id"];
+  res.cookie("user_id", user);
   res.redirect(`/urls/`);
 });
 
@@ -107,9 +112,9 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  if (req.body.email === "") return res.status(400).send('Email form is empty');
-  if (req.body.password === "") return res.status(400).send('Password form is empty');
-  if (propertySearch(users, "email", req.body.email)) return res.status(400).send('Email already exists');
+  if (req.body.email === "") return res.status(400).send('Email form is empty.');
+  if (req.body.password === "") return res.status(400).send('Password form is empty.');
+  if (propertySearch(users, "email", req.body.email)) return res.status(400).send('Email already exists.');
   const id = generateRandomString(42);
   users[id] = req.body;
   users[id]["id"] = id;
