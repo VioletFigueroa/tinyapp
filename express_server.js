@@ -11,13 +11,13 @@ app.use(cookieParser());
 
 const users = {
   "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff": {
-    id: "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff", 
-    "email": "user@example.com", 
+    id: "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff",
+    "email": "user@example.com",
     password: "purple-monkey-dinosaur"
   },
   "3oqdszqj6vi2u7mnmqa9qr5z3tf08sz1oboq4kgv6g": {
-    id: "3oqdszqj6vi2u7mnmqa9qr5z3tf08sz1oboq4kgv6g", 
-    email: "user2@example.com", 
+    id: "3oqdszqj6vi2u7mnmqa9qr5z3tf08sz1oboq4kgv6g",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
@@ -94,6 +94,11 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
+  if (req.body.email === "") return res.status(400).send('Email form is empty');
+  if (req.body.password === "") return res.status(400).send('Password form is empty');
+  for (const user of Object.keys(users)) {
+    if (req.body.email === users[user]["email"]) return res.status(400).send('Email already exists');
+  }
   const id = generateRandomString(42);
   users[id] = req.body;
   users[id]["id"] = id;
