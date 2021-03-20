@@ -90,7 +90,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const formEmail = req.body["email"];
   const userEmail = propertySearch(users, "email", formEmail);
-  const formPassword = req.body["password"]
+  const formPassword = req.body["password"];
   const userPassword = propertySearch(users, "password", formPassword);
   if (!userEmail || !userPassword || userEmail["password"] !== formPassword) {
     return res.status(403).send('Username or Password incorrect.');
