@@ -3,14 +3,14 @@
 <head>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <title>Register - TinyApp Example</title>
+  <title>Login - TinyApp Example</title>
 </head>
 <%- include('partials/_header') %>
 <body>
   <div class="card text-center">
-      <div class="card-header">Create yout account</div>
+      <div class="card-header">Log in</div>
       <div class="card-body">
-        <form action="/register" method="POST">
+        <form action="/login" method="POST">
           <label for="email">Enter Email:</label>
           <input  type="email" name="email" placeholder="example@example.com" style="width: 300px; margin: 1em">
           <label for="password">Enter Password:</label>

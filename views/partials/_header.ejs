@@ -18,11 +18,10 @@
         </form>
       </div>
     <% } else { %>  
-      <form action="/login" method="POST">
-        <input  type="email" name="email" placeholder="Example@example.com">
-        <input  type="password" name="password" placeholder="password">
-        <button type="submit" class="btn btn-primary">Login</button>
-      </form>
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/login">Login</a>
+        <a class="nav-item nav-link" href="/register">Register</a>
+      </div>
    <% } %>
     
   </nav>

@@ -81,6 +81,12 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  let templateVars = {user: null};
+  if (req.cookies.user_id) res.redirect(`/urls/`);
+  res.render("login", templateVars);
+});
+
 app.post("/login", (req, res) => {
   if (propertySearch(users, "email", req.body["email"])  && propertySearch(users, "password", req.body["password"])) {
     const user = propertySearch(users, "email", req.body["email"])["id"];
