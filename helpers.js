@@ -10,7 +10,9 @@ const propertySearch = (object, key, value) => {
   //returns empty object if no matches;
 };
 
-const urlsForUser = (id, database) => propertySearch(database, "userID", id);
+const urlsForUser = (id, database) => lodash.isEmpty(propertySearch(database, "userID", id)) ? undefined : propertySearch(database, "userID", id);
+
+const getUserByEmail = (email, database) => lodash.isEmpty(propertySearch(database, "email", email)) ? undefined : propertySearch(database, "email", email)[Object.keys(database)[0]];
 
 const generateRandomChar = () => {
   const chars = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9'];
@@ -24,4 +26,4 @@ const generateRandomString = (length, database) => {
   return randomString;
 };
 
-module.exports = { propertySearch, urlsForUser, generateRandomString };
+module.exports = { propertySearch, urlsForUser, generateRandomString, getUserByEmail };
