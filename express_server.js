@@ -4,22 +4,27 @@ const PORT = 8080;
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+
 app.set("view engine", "ejs");
 
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
+
 const lodash = require("lodash");
+
+const bcrypt = require('bcrypt');
+
 
 const users = {
   "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff": {
     id: "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff",
     "email": "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "$2b$10$.Wf0XouumqkD2DpCjP9tLuDZcCipHvE9DsfoCaDQvfCU3BfcNpCAC"
   },
   "3oqdszqj6vi2u7mnmqa9qr5z3tf08sz1oboq4kgv6g": {
     id: "3oqdszqj6vi2u7mnmqa9qr5z3tf08sz1oboq4kgv6g",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "$2b$10$BRfGePMEvRzNThK3lNaKJudM1VFhmiouvX4zY8nzmhDYRLcU9hL.W"
   }
 };
 
@@ -38,7 +43,7 @@ const propertySearch = (object, key, value) => {
   //returns empty object if no matches;
 };
 
-const urlsForUser = id => propertySearch(users, "id", id);
+const urlsForUser = id => propertySearch(urlDatabase, "userID", id);
 
 const generateRandomString = length => {
   const generateRandomChar = () => {
@@ -60,16 +65,19 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  if (!req.cookies["user_id"]) {
+  const userID = req.cookies["user_id"];
+  if (!userID) {
     return res.redirect("/login");
   }
-  const templateVars = { user: users[req.cookies["user_id"]], urls:  urlDatabase };
+  const templateVars = { user: users[userID], urls: urlsForUser(userID) };
   return res.render("urls_index", templateVars);
 });
 
 app.post("/urls/new", (req, res) => {
   const shortURL = generateRandomString(6);
-  if (req.body["longURL"]) urlDatabase[shortURL]["longURL"] = req.body["longURL"];
+  if (req.body.longURL) {
+    urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.cookies["user_id"]};
+  }
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -96,15 +104,14 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  if (lodash.isEmpty(req.body["email"])) return res.status(403).send('Please Enter an email');
   const formEmail = req.body["email"];
   const userEmail = propertySearch(users, "email", formEmail);
+  if (lodash.isEmpty(userEmail)) return res.status(403).send('Email or Password incorrect.');
   const formPassword = req.body["password"];
-  const userPassword = propertySearch(users, "password", formPassword);
-  if (!lodash.isEmpty(userEmail) || !lodash.isEmpty(userPassword) || userEmail["password"] !== formPassword) {
-    return res.status(403).send('Username or Password incorrect.');
-  }
-  const user = userEmail["id"];
-  res.cookie("user_id", user);
+  const userID = userEmail[Object.keys(userEmail)[0]]["id"];
+  if (!bcrypt.compareSync(formPassword, users[userID]["password"])) return res.status(403).send('Email or Password incorrect.');
+  res.cookie("user_id", userID);
   return res.redirect("/urls");
 });
 
@@ -120,41 +127,47 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  if (req.body.email === "") return res.status(400).send('Email form is empty.');
-  if (req.body.password === "") return res.status(400).send('Password form is empty.');
-  if (!lodash.isEmpty(propertySearch(users, "email", req.body.email))) return res.status(400).send('Email already exists.');
-  const id = generateRandomString(42);
-  users[id] = req.body;
-  users[id]["id"] = id;
-  res.cookie("user_id", id);
+  if (lodash.isEmpty(req.body["email"])) return res.status(400).send('Email form is empty.');
+  if (lodash.isEmpty(req.body["password"])) return res.status(400).send('Password form is empty.');
+  if (!lodash.isEmpty(propertySearch(users, "email", req.body["email"]))) return res.status(400).send('Email already exists.');
+  const userID = generateRandomString(42);
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+  users[userID] = {};
+  users[userID]["id"] = userID;
+  users[userID]["email"] = req.body["email"];
+  users[userID]["password"] = hashedPassword;
+  res.cookie("user_id", userID);
   return res.redirect("/urls");
 });
-
 app.post("/urls/:id", (req, res) => {
-  if (!req.cookies["user_id"]) return res.redirect("/urls");
+  if (!req.cookies["user_id"] || req.cookies["user_id"] !== urlDatabase[req.params.id]["userID"]) return res.redirect("/login");
   urlDatabase[req.params.id]["longURL"] = req.body["longURL"];
   return res.redirect(`/urls/${req.params.id}`);
 });
 
-app.get("/urls/:shortURL", (req, res) => {
-  if (!req.cookies["user_id"]) {
-    return res.redirect("/login");
-  }
-  const templateVars = { user: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]["longURL"]};
-  res.render("urls_show", templateVars);
+app.get("/urls/:id", (req, res) => {
+  if (!req.cookies["user_id"] || req.cookies["user_id"] !== urlDatabase[req.params.id]["userID"]) return res.redirect("/login");
+  const user = users[req.cookies["user_id"]];
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL]["longURL"];
+  const templateVars = { user, shortURL, longURL };
+  if (!urlsForUser(user.shortURL)) return res.redirect("/urls");
+  return res.render("urls_show", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id]["longURL"];
-  res.redirect(longURL);
+  return res.redirect(longURL);
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
-  if (req.params.shortURL && urlDatabase[req.params.shortURL]) delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+app.post("/urls/:id/delete", (req, res) => {
+  if (!req.cookies["user_id"] || req.cookies["user_id"] !== urlDatabase[req.params.id]["userID"]) return res.redirect("/login");
+  if (req.params.id && urlDatabase[req.params.id]) delete urlDatabase[req.params.id];
+  return res.redirect("/urls");
 });
 
-app.get("/urls/:shortURL/delete", (req, res) => {
-  if (req.params.shortURL && urlDatabase[req.params.shortURL]) delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+app.get("/urls/:id/delete", (req, res) => {
+  if (!req.cookies["user_id"] || req.cookies["user_id"] !== urlDatabase[req.params.id]["userID"]) return res.redirect("/login");
+  if (req.params.id && urlDatabase[req.params.id]) delete urlDatabase[req.params.id];
+  return res.redirect("/urls");
 });
