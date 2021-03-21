@@ -20,6 +20,7 @@ const lodash = require("lodash");
 
 const bcrypt = require('bcrypt');
 
+const helpers = require('./helpers.js');
 
 const users = {
   "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff": {
@@ -39,29 +40,6 @@ const urlDatabase = {
   i3BoGr: { longURL: "https://www.google.ca", userID: "3oqdszqj6vi2u7mnmqa9qr5z3tf08sz1oboq4kgv6g" }
 };
 
-const propertySearch = (object, key, value) => {
-  //takes in object of objects, a key, and an expected value.
-  let output = {};
-  for (const id of Object.keys(object)) {
-    if (object[id][key] === value) output[id] = object[id]; //Returns object in object if value is found in that object
-  }
-  return output;
-  //returns empty object if no matches;
-};
-
-const urlsForUser = id => propertySearch(urlDatabase, "userID", id);
-
-const generateRandomString = length => {
-  const generateRandomChar = () => {
-    const chars = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9'];
-    return chars[Math.floor(Math.random() * chars.length)];
-  };
-  let randomString = '';
-  for (let i = 0; i < length; i++) randomString += generateRandomChar();
-  if (!lodash.isEmpty(propertySearch(urlDatabase, "shortURL", randomString))) return generateRandomString(length);
-  return randomString;
-};
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
@@ -75,12 +53,12 @@ app.get("/urls", (req, res) => {
   if (!userID) {
     return res.redirect("/login");
   }
-  const templateVars = { user: users[userID], urls: urlsForUser(userID) };
+  const templateVars = { user: users[userID], urls: helpers.urlsForUser(userID, urlDatabase) };
   return res.render("urls_index", templateVars);
 });
 
 app.post("/urls/new", (req, res) => {
-  const shortURL = generateRandomString(6);
+  const shortURL = helpers.generateRandomString(6, urlDatabase);
   if (req.body.longURL) {
     urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.session.userID};
   }
@@ -112,7 +90,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   if (lodash.isEmpty(req.body["email"])) return res.status(403).send('Please Enter an email');
   const formEmail = req.body["email"];
-  const userEmail = propertySearch(users, "email", formEmail);
+  const userEmail = helpers.propertySearch(users, "email", formEmail);
   if (lodash.isEmpty(userEmail)) return res.status(403).send('Email or Password incorrect.');
   const formPassword = req.body["password"];
   const userID = userEmail[Object.keys(userEmail)[0]]["id"];
@@ -135,8 +113,8 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   if (lodash.isEmpty(req.body["email"])) return res.status(400).send('Email form is empty.');
   if (lodash.isEmpty(req.body["password"])) return res.status(400).send('Password form is empty.');
-  if (!lodash.isEmpty(propertySearch(users, "email", req.body["email"]))) return res.status(400).send('Email already exists.');
-  const userID = generateRandomString(42);
+  if (!lodash.isEmpty(helpers.propertySearch(users, "email", req.body["email"]))) return res.status(400).send('Email already exists.');
+  const userID = helpers.generateRandomString(42, users);
   const hashedPassword = bcrypt.hashSync(req.body.password, 10);
   users[userID] = {};
   users[userID]["id"] = userID;
@@ -157,7 +135,7 @@ app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL]["longURL"];
   const templateVars = { user, shortURL, longURL };
-  if (!urlsForUser(user.shortURL)) return res.redirect("/urls");
+  if (!helpers.urlsForUser(user.shortURL, urlDatabase)) return res.redirect("/urls");
   return res.render("urls_show", templateVars);
 });
 
