@@ -10,7 +10,7 @@ const propertySearch = (object, key, value) => {
   //returns empty object if no matches;
 };
 
-const urlsForUser = (id, database) => lodash.isEmpty(propertySearch(database, "userID", id)) ? undefined : propertySearch(database, "userID", id);
+const urlsForUser = (userID, database) => lodash.isEmpty(propertySearch(database, "userID", userID)) ? undefined : propertySearch(database, "userID", userID);
 
 const getUserByEmail = (email, database) => lodash.isEmpty(propertySearch(database, "email", email)) ? undefined : propertySearch(database, "email", email)[Object.keys(database)[0]];
 
