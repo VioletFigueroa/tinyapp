@@ -44,10 +44,6 @@ app.listen(PORT, () => {
   console.log(`Tinyapp listening on port ${PORT}!`);
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
 app.get("/", (req, res) => {
   const userID = req.session.userID;
   if (!userID) return res.redirect("/login");
@@ -68,16 +64,6 @@ app.get("/urls/new", (req, res) => {
   return res.render("urls_new", templateVars);
 });
 
-app.post("/urls/", (req, res) => {
-  if (!req.body.longURL) {
-    res.status(400).send('Please enter a link');
-    return res.redirect("/urls/new");
-  }
-  const shortURL = helpers.generateRandomString(6, urlDatabase);
-  urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.session.userID};
-  return res.redirect(`/urls/${shortURL}`);
-});
-
 app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   if (userID !== urlDatabase[shortURL]["userID"]) return res.send('Please login first to access this link.');
@@ -90,6 +76,25 @@ app.get("/urls/:id", (req, res) => {
   return res.render("urls_show", templateVars);
 });
 
+app.get("/u/:id", (req, res) => {
+  if (urlDatabase[req.params.id]["longURL"]) {
+    res.status(404).send(`Please try another link. This link was not found. \n Here's another link instead to make up for it ;P`);
+    return res.redirect("https://youtu.be/GNZMCS2dbag");
+  }
+  const longURL = urlDatabase[req.params.id]["longURL"];
+  return res.redirect(longURL);
+});
+
+app.post("/urls/", (req, res) => {
+  if (!req.body.longURL) {
+    res.status(400).send('Please enter a link');
+    return res.redirect("/urls/new");
+  }
+  const shortURL = helpers.generateRandomString(6, urlDatabase);
+  urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.session.userID};
+  return res.redirect(`/urls/${shortURL}`);
+});
+
 app.post("/urls/:id", (req, res) => {
   const userID = req.session.userID;
   if (userID !== urlDatabase[req.params.id]["userID"]) {
@@ -100,39 +105,16 @@ app.post("/urls/:id", (req, res) => {
   return res.redirect(`/urls/${req.params.id}`);
 });
 
-
-
-app.get("/u/:id", (req, res) => {
-  if (urlDatabase[req.params.id]["longURL"]) {
-    res.status(404).send(`Please try another link. This link was not found. \n Here's another link instead to make up for it ;P`);
-    return res.redirect("https://youtu.be/GNZMCS2dbag");
-  }
-  const longURL = urlDatabase[req.params.id]["longURL"];
-  return res.redirect(longURL);
-});
-
-app.post("/urls/:id/delete", (req, res) => {
-  if (req.session.userID !== urlDatabase[req.params.id]["userID"]) {
-    res.status(400).send('Please login as the link owner to delete this link');
-    return res.redirect("/login");
-  }
-  if (req.params.id && urlDatabase[req.params.id]) delete urlDatabase[req.params.id];
-  return res.redirect("/urls");
-});
-
-app.get("/urls/:id/delete", (req, res) => {
-  if (!req.session.userID || req.session.userID !== urlDatabase[req.params.id]["userID"]) {
-    res.status(400).send('Please login first to delete this link');
-    return res.redirect("/login");
-  }
-  if (req.params.id && urlDatabase[req.params.id]) delete urlDatabase[req.params.id];
-  return res.redirect("/urls");
-});
-
 app.get("/login", (req, res) => {
   const templateVars = {user: null};
   if (req.session.userID) return res.redirect("/urls");
   return res.render("login", templateVars);
+});
+
+app.get("/register", (req, res) => {
+  let templateVars = {user: null};
+  if (req.session.userID) return res.redirect("/urls");
+  return res.render("register", templateVars);
 });
 
 app.post("/login", (req, res) => {
@@ -156,17 +138,6 @@ app.post("/login", (req, res) => {
   return res.redirect("/urls");
 });
 
-app.post("/logout", (req, res) => {
-  delete req.session.userID;
-  return res.redirect("/urls");
-});
-
-app.get("/register", (req, res) => {
-  let templateVars = {user: null};
-  if (req.session.userID) return res.redirect("/urls");
-  return res.render("register", templateVars);
-});
-
 app.post("/register", (req, res) => {
   if (lodash.isEmpty(req.body["email"]) || lodash.isEmpty(req.body["password"])) {
     res.status(400).send('Please enter an Email and Password');
@@ -184,4 +155,27 @@ app.post("/register", (req, res) => {
   users[userID]["password"] = hashedPassword;
   req.session.userID = userID;
   return res.redirect("/urls/");
+});
+
+app.post("/logout", (req, res) => {
+  delete req.session.userID;
+  return res.redirect("/urls");
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  if (req.session.userID !== urlDatabase[req.params.id]["userID"]) {
+    res.status(400).send('Please login as the link owner to delete this link');
+    return res.redirect("/login");
+  }
+  if (req.params.id && urlDatabase[req.params.id]) delete urlDatabase[req.params.id];
+  return res.redirect("/urls");
+});
+
+app.get("/urls/:id/delete", (req, res) => {
+  if (!req.session.userID || req.session.userID !== urlDatabase[req.params.id]["userID"]) {
+    res.status(400).send('Please login first to delete this link');
+    return res.redirect("/login");
+  }
+  if (req.params.id && urlDatabase[req.params.id]) delete urlDatabase[req.params.id];
+  return res.redirect("/urls");
 });
