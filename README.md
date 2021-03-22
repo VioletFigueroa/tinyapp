@@ -13,8 +13,8 @@ so that I can read interesting content.
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["Screenshot of Login Page"](https://github.com/VioletFigueroa/tinyapp/blob/9fc211434dc908f751201fad6be76a9e1a7871ab/docs/login-page.png?raw=true)
+!["Screenshot of User URLs Page"](https://github.com/VioletFigueroa/tinyapp/blob/9fc211434dc908f751201fad6be76a9e1a7871ab/docs/urls-page.png?raw=true)
 
 ## Dependencies
 
@@ -30,4 +30,4 @@ so that I can read interesting content.
 
 - Install all dependencies (using the `npm install` command).
 - Run the development web server using the `node express_server.js` command (npm start).
-- Navigate to http://localhost:8080/login on your browser to test server functionality.
+- Navigate to http://localhost:8080/ on your browser to test server functionality.
