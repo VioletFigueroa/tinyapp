@@ -10,7 +10,7 @@ const app = express();
 const PORT = 8080;
 // Bodyparser Settings;
 app.use(bodyParser.urlencoded({extended: true}));
-// CookieSeesion Settings;
+// CookieSession Settings;
 app.use(cookieSession({
   name: 'session',
   keys: ["error-keys-must-be-provided."],
@@ -22,19 +22,19 @@ app.set("view engine", "ejs");
 // Sample users database with test user accounts;
 const users = {
   "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff": {
-    id: "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff",
+    "id": "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff",
     "email": "user@example.com",
-    password: "$2b$10$.Wf0XouumqkD2DpCjP9tLuDZcCipHvE9DsfoCaDQvfCU3BfcNpCAC"
+    "password": "$2b$10$.Wf0XouumqkD2DpCjP9tLuDZcCipHvE9DsfoCaDQvfCU3BfcNpCAC"
   },
   "3oqdszqj6vi2u7mnmqa9qr5z3tf08sz1oboq4kgv6g": {
-    id: "3oqdszqj6vi2u7mnmqa9qr5z3tf08sz1oboq4kgv6g",
-    email: "user2@example.com",
-    password: "$2b$10$BRfGePMEvRzNThK3lNaKJudM1VFhmiouvX4zY8nzmhDYRLcU9hL.W"
+    "id": "3oqdszqj6vi2u7mnmqa9qr5z3tf08sz1oboq4kgv6g",
+    "email": "user2@example.com",
+    "password": "$2b$10$GMXdN0T6/kG9QTLOHBFrv.cjFdr2v4JWK.Xd6GWZEp8B55LyYuZZC"
   }
 };
 // Sample URL Database with test shortened link string, longURL with website link info, and userID to determine which user created the shortened URL;
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff" },
+  b6UTxQ: { longURL: "https://youtu.be/GNZMCS2dbag", userID: "fz7rsp6sc7wky8qohzsfeiw0qhachayizw18kkunff" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "3oqdszqj6vi2u7mnmqa9qr5z3tf08sz1oboq4kgv6g" }
 };
 // Tinyapp listening message so server owner knows which port user should access;
@@ -90,7 +90,7 @@ app.get("/u/:id", (req, res) => {
 // Redirects to /login with message "Please Log in" in form if user isn't logged in;
 // Returns an error if longURL was not submitted;
 app.post("/urls/", (req, res) => {
-  const userID = req.session.userID
+  const userID = req.session.userID;
   if (!userID) return res.redirect("/login");
   if (!req.body.longURL) return res.status(400).send('Please enter a link');
   const shortURL = helpers.generateRandomString(6, urlDatabase);
@@ -142,9 +142,9 @@ app.post("/login", (req, res) => {
   if (!formEmail) return res.status(400).send('Please enter an email');
   const formPassword = req.body["password"];
   if (!formPassword) return res.status(400).send('Please enter a password');
-  const userEmail = helpers.getUserByEmail(formEmail, users);
-  if (!userEmail) return res.status(400).send('Please register email with a new account');
-  const userID = userEmail[Object.keys(userEmail)[0]]["id"];
+  const userEmail =  helpers.propertySearch(users, "email", formEmail);
+  if (!userEmail) return res.status(400).send('Please enter an email registered with an account');
+  const userID = Object.keys(userEmail)[0];
   if (!bcrypt.compareSync(formPassword, users[userID]["password"])) return res.status(400).send('Please enter a correct Email and Password');
   req.session.userID = userID;
   return res.redirect("/urls");
@@ -175,5 +175,15 @@ app.post("/register", (req, res) => {
 // Redirects to /urls page;
 app.post("/logout", (req, res) => {
   delete req.session.userID;
+  return res.redirect("/urls");
+});
+// Deletes a urlDatabase entry with shortURL, if logged in;
+// Redirects to /urls following removal;
+// Redirects to /login with message "Please Log in" in form if user isn't logged in;
+// Returns an error if shorturl requested for deletion wasn't created by this user;
+app.get("/urls/:id/delete", (req, res) => {
+  if (!req.session.userID) return res.redirect("/login");
+  if (req.session.userID !== urlDatabase[req.params.id]["userID"]) return res.status(403).send('Please login as the link owner to delete this link');
+  if (req.params.id && urlDatabase[req.params.id]) delete urlDatabase[req.params.id];
   return res.redirect("/urls");
 });

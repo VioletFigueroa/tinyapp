@@ -16,7 +16,7 @@ const urlsForUser = (userID, database) => lodash.isEmpty(propertySearch(database
 // Returns the objects in object database that contains the email as a property is found in that object;
 // Returns undefined if no matches found in objects;
 const getUserByEmail = (email, database) => lodash.isEmpty(propertySearch(database, "email", email)) ? undefined : propertySearch(database, "email", email)[Object.keys(database)[0]];
-//Returns a random (lowercase only) a-z or 0-9 char; 
+//Returns a random (lowercase only) a-z or 0-9 char;
 const generateRandomChar = () => {
   const chars = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9'];
   return chars[Math.floor(Math.random() * chars.length)];
