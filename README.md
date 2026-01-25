@@ -13,11 +13,13 @@
 **Result snapshot:** Full-stack web application with authentication, authorization, password hashing, and session management.
 
 **Quick review:**
+
 - **Security focus:** bcrypt password hashing, cookie-based sessions, authorization controls, input validation
 - **Key files:** `express_server.js` (server + security controls), `helpers.js` (utilities)
 - **Start with:** Review authentication and authorization middleware implementation
 
 ## Overview
+
 TinyApp is a full-stack web application built with Node.js and Express that allows users to shorten long URLs (similar to bit.ly). The project demonstrates fundamental web application security concepts including authentication, authorization, password hashing, session management, and access control.
 
 **Developed during:** Lighthouse Labs Web Development Bootcamp (March 2021)
@@ -25,6 +27,7 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 ## Security Relevance for Application Security
 
 ### Authentication & Password Security
+
 - **bcrypt password hashing** with salt rounds for secure credential storage
 - **Password comparison** using timing-safe bcrypt.compare() to prevent timing attacks
 - **Secure password storage** - plaintext passwords never stored in database
@@ -32,6 +35,7 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 - Industry-standard password security implementation
 
 ### Session Management
+
 - **cookie-session middleware** for server-side session handling
 - **Signed cookies** with secret keys prevent tampering
 - **Session expiration** with configurable maxAge (24 hours)
@@ -39,6 +43,7 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 - Proper session lifecycle management (creation, validation, destruction)
 
 ### Authorization & Access Control
+
 - **User-specific resource access** - users can only view/edit/delete their own URLs
 - **Authorization checks** on every sensitive endpoint
 - **401 Unauthorized** responses for access violations
@@ -46,6 +51,7 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 - Demonstrates principle of least privilege and defense in depth
 
 ### Input Validation & Error Handling
+
 - **URL validation** prevents empty or malformed submissions
 - **Parameter validation** for route parameters (short URL codes)
 - **Error status codes** (400 Bad Request, 401 Unauthorized, 404 Not Found)
@@ -53,6 +59,7 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 - **Redirect validation** prevents open redirect vulnerabilities
 
 ### Secure Development Practices
+
 - **Random ID generation** using cryptographically appropriate methods
 - **User enumeration protection** - login errors don't reveal if email exists
 - **Dependency management** with security-focused packages (bcrypt >=2.0.0)
@@ -60,6 +67,7 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 - **Code organization** facilitates security review and testing
 
 ## Objectives
+
 - Implement secure user authentication from scratch
 - Create authorization controls for resource access
 - Build RESTful API with proper HTTP methods and status codes
@@ -67,6 +75,7 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 - Handle errors securely without information disclosure
 
 ## Methodology
+
 - **Express.js** for routing and middleware architecture
 - **EJS templating** for server-side rendering
 - **bcrypt** for password hashing and verification
@@ -74,6 +83,7 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 - **Mocha & Chai** for unit testing security-critical functions
 
 ## Key Features
+
 - **User Registration:** Email-based account creation with hashed passwords
 - **User Login:** Secure authentication with bcrypt password verification
 - **Session Management:** Persistent sessions with secure cookies
@@ -83,6 +93,7 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 - **Error Handling:** Appropriate status codes and user-friendly messages
 
 ## Technologies Used
+
 - **Backend:** Node.js, Express.js 4.17
 - **Templating:** EJS (Embedded JavaScript)
 - **Security:** bcrypt >=2.0.0, cookie-session 1.4
@@ -91,6 +102,7 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 - **Development:** nodemon for hot reloading
 
 ## Application Security Lessons Learned
+
 - **Password hashing is non-negotiable:** Never store plaintext passwords; bcrypt's adaptive hashing provides future-proof security
 - **Session management requires layered security:** Signed cookies, expiration, and proper validation all work together
 - **Authorization is separate from authentication:** Being logged in doesn't mean access to all resources
@@ -101,11 +113,13 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 ## Files Included
 
 **Core Application:**
+
 - `express_server.js` - Main server with authentication and authorization logic
 - `helpers.js` - Utility functions including random ID generation and user lookup
 - `package.json` - Dependencies with security-conscious versioning
 
 **Views (EJS Templates):**
+
 - `views/urls_index.ejs` - User's URL dashboard
 - `views/urls_show.ejs` - Individual URL edit page
 - `views/urls_new.ejs` - Create new short URL form
@@ -114,23 +128,27 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 - `views/partials/_header.ejs` - Navigation with session state
 
 **Testing:**
+
 - `test/helpersTest.js` - Unit tests for security-critical helper functions
 
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js (v10.x or higher)
 - npm (v6.x or higher)
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/VioletFigueroa/tinyapp.git
    cd tinyapp
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -138,14 +156,17 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 3. **Configure session secrets** (Production)
    - Edit `express_server.js` line 18
    - Replace placeholder key with cryptographically random string:
+
    ```javascript
    keys: ["your-secret-key-here"]
    ```
 
 4. **Start the server**
+
    ```bash
    npm start
    ```
+
    The application will be available at `http://localhost:8080`
 
 ### Running Tests
@@ -155,6 +176,7 @@ npm test
 ```
 
 ## User Stories
+
 **As an avid twitter poster:**
 I want to be able to shorten links so that I can fit more non-link text in my tweets.
 
@@ -174,34 +196,41 @@ I want to be able to visit sites via shortened links so that I can read interest
 ## Usage
 
 ### Create an Account
+
 1. Navigate to `/register`
 2. Enter email and password
 3. Password is automatically hashed with bcrypt
 
 ### Login
+
 1. Navigate to `/login`
 2. Enter credentials
 3. Session cookie established on successful authentication
 
 ### Shorten URLs
+
 1. Click "Create New URL"
 2. Paste long URL
 3. Receive short URL (format: `/u/:shortCode`)
 
 ### Manage URLs
+
 - **View all:** `/urls` shows your URL dashboard
 - **Edit:** Click edit on any URL you own
 - **Delete:** Remove URLs from your collection
 - **Share:** Short URLs work for anyone (public access)
 
 ### Test Accounts
+
 Demo users (for testing only):
+
 - Email: `user@example.com` / Password: `purple-monkey-dinosaur`
 - Email: `user2@example.com` / Password: `dishwasher-funk`
 
 ## Security Features Demonstration
 
 ### Authorization Test
+
 1. Login as user1, create a URL (e.g., `/u/b6UTxQ`)
 2. Note the short URL ID
 3. Logout and login as user2
@@ -209,12 +238,14 @@ Demo users (for testing only):
 5. **Expected:** 401 Unauthorized - demonstrates access control
 
 ### Session Security Test
+
 1. Login and note your session cookie
 2. Clear cookies (logout)
 3. Try to access `/urls/new`
 4. **Expected:** Redirect to login - demonstrates session validation
 
 ### Password Hashing Verification
+
 - Stored passwords in `users` object are bcrypt hashes
 - Format: `$2b$10$...` indicates bcrypt with 10 salt rounds
 - **Never** stored in plaintext
@@ -230,6 +261,7 @@ This project demonstrates several AppSec fundamentals:
 5. **Security Testing:** Writing tests to validate security assumptions
 
 The skills developed here translate directly to application security work:
+
 - **Code Review:** Identifying authentication/authorization flaws in codebases
 - **Security Testing:** Testing login flows, session handling, and access controls
 - **Threat Modeling:** Understanding attack vectors against web applications
