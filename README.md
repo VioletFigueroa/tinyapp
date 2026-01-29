@@ -24,6 +24,24 @@ TinyApp is a full-stack web application built with Node.js and Express that allo
 
 **Developed during:** Lighthouse Labs Web Development Bootcamp (March 2021)
 
+## Development Approach
+
+### LLM Usage (~5-10% of implementation)
+This bootcamp project involved minimal AI assistance, limited to:
+- **Syntax Reference**: Quick lookups for Express.js and EJS syntax
+- **Template Snippets**: Basic HTML/EJS structure patterns
+
+All core implementation is original work demonstrating hands-on learning.
+
+### Human-Led Implementation (~90-95%)
+- **Core Architecture**: Server structure, routing design, and middleware organization
+- **Security Implementation**: bcrypt password hashing, session management, authorization logic (100% original)
+- **Authentication Flow**: Login/registration logic, cookie handling, user validation
+- **Testing & Validation**: All test cases and edge case handling
+
+### Development Philosophy
+This project represents fundamental hands-on learning of web security concepts. The minimal LLM usage reflects the bootcamp learning environment where understanding core concepts through implementation was essential.
+
 ## Security Relevance for Application Security
 
 ### Authentication & Password Security
