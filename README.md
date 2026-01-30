@@ -1,10 +1,16 @@
-# TinyApp - URL Shortener
+<div align="center">
 
-![GitHub last commit](https://img.shields.io/github/last-commit/VioletFigueroa/tinyapp?style=flat-square)
-![GitHub repo size](https://img.shields.io/github/repo-size/VioletFigueroa/tinyapp?style=flat-square)
-![License](https://img.shields.io/badge/license-Educational-blue?style=flat-square)
+# 🔗 TinyApp
+### _URL Shortener with Secure Authentication_
+
+![GitHub last commit](https://img.shields.io/github/last-commit/VioletFigueroa/tinyapp?style=flat-square&color=6B46C1)
+![GitHub repo size](https://img.shields.io/github/repo-size/VioletFigueroa/tinyapp?style=flat-square&color=6B46C1)
+![License](https://img.shields.io/badge/license-Educational-6B46C1?style=flat-square)
+![Portfolio](https://img.shields.io/badge/portfolio-project-6B46C1?style=flat-square)
 
 **Quick Links:** [Security Features](#security-relevance-for-application-security) | [Setup](#getting-started) | [Testing](#running-tests)
+
+</div>
 
 ---
 
@@ -23,6 +29,25 @@
 TinyApp is a full-stack web application built with Node.js and Express that allows users to shorten long URLs (similar to bit.ly). The project demonstrates fundamental web application security concepts including authentication, authorization, password hashing, session management, and access control.
 
 **Developed during:** Lighthouse Labs Web Development Bootcamp (March 2021)
+
+## 🎯 Portfolio Context
+
+**Career Timeline:** Early Learning → Web Development Foundations (2021)  
+**Skills Demonstrated:** Authentication architecture, password security, session management, authorization controls, secure coding practices  
+**Related Projects:**
+- See [LightBnB](https://github.com/VioletFigueroa/lightBnB) for database security (SQL injection prevention)
+- See [Interview Scheduler](https://github.com/VioletFigueroa/interview-scheduler) for React security patterns
+- Builds on fundamentals from [Lotide](https://github.com/VioletFigueroa/lotide) (testing & algorithms)
+
+**Why This Matters for Employers:**
+
+Web applications remain a primary attack vector, with authentication flaws consistently appearing in the OWASP Top 10. This project proves I understand authentication vulnerabilities from a *developer's perspective*, making me more effective at:
+- Identifying authentication issues during security assessments
+- Communicating security findings to engineering teams in their language
+- Reviewing code for security anti-patterns
+- Understanding how authentication bypasses actually work
+
+As a security analyst with development experience, I can bridge the gap between security and engineering teams—speaking both languages fluently and understanding the constraints developers face.
 
 ## Development Approach
 
